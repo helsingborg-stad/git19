@@ -24,6 +24,7 @@
     "react-router-dom": "5.1.0",
     "react-scripts": "3.3.0",
     "react-spinners": "^0.8.0",
+    "react-swipeable-views": "^0.13.8",
     "smoothscroll-polyfill": "^0.4.4",
     "storybook": "^5.3.3",
     "styled-components": "^5.0.0",

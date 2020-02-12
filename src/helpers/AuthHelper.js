@@ -1,79 +1,52 @@
-import decode from "jwt-decode";
-import StorageService, { TOKEN_KEY, USER_KEY } from './../services/StorageService';
+import decode from 'jwt-decode';
+import { TOKEN_KEY, USER_KEY } from '../services/StorageService';
 
-export default class AuthHelper {
-
-  /**
-   * Login user. Saves user and token to storage
-   */
-  static logIn = async (user, token) => {
-    return new Promise(async (resolve, reject) => {
-      // Check if token is valid
-      if (this.isTokenExpired(token)) {
-        reject();
-      }
-
-      // Store user data
-      const data = [
-        [USER_KEY, JSON.stringify(user)],
-        [TOKEN_KEY, token],
-      ];
-
-      return await StorageService.multiSaveData(data)
-        .then(() => resolve())
-        .catch(() => reject());
-    });
-  };
-
-  /**
-   * Clear access token
-   */
-  static logOut = async () => {
-    await StorageService.removeData(TOKEN_KEY);
-  };
-
-  /**
-   * Checks if there is a saved token and is still valid
-   */
-  static loggedIn = async () => {
-    const token = await this.getToken();
-
-    return !!token && !this.isTokenExpired(token);
-  };
-
-  /**
-   * Check if token is expired
-   */
-  static isTokenExpired = token => {
-    try {
-      const decoded = decode(token);
-      if (decoded.exp > Math.floor(Date.now() / 1000)) {
-        return false;
-      } else return true;
-    } catch (err) {
-      console.log("Token is expired!");
-      return true;
+/**
+ * Check if token is expired
+ */
+export const isTokenExpired = token => {
+  try {
+    const decoded = decode(token);
+    if (decoded.exp > Math.floor(Date.now() / 1000)) {
+      return false;
     }
-  };
-
-  /**
-   * Retrieves the access token from async storage
-   */
-  static getToken = async () => {
-    return await StorageService.getData(TOKEN_KEY);
-  };
-
-  /**
-  * Check if user exist in store
-  */
-  static confirmUser = () => {
-    return new Promise(async (resolve, reject) => {
-      const user = await StorageService.getData(USER_KEY);
-      if (typeof user === 'undefined' || user === null) {
-        reject();
-      }
-
-      resolve();
-    });
+    return true;
+  } catch (err) {
+    console.log('Token is expired');
+    return true;
   }
-}
+};
+
+/**
+ * Login user. Saves user and token to storage
+ */
+export const logIn = ({ user, token }) => {
+  if (isTokenExpired(token)) {
+    return false;
+  }
+
+  window.localStorage.setItem(TOKEN_KEY, token);
+
+  return true;
+};
+
+/**
+ * Clear access token
+ */
+export const logOut = () => {
+  window.localStorage.removeItem(TOKEN_KEY);
+};
+
+/**
+ * Retrieves the access token from local storage
+ */
+export const getToken = () => window.localStorage.getItem(TOKEN_KEY);
+
+/**
+ * Checks if there is a saved token and is still valid
+ */
+export const authenticated = () => {
+  const token = getToken();
+
+  return !!token && !isTokenExpired(token);
+};

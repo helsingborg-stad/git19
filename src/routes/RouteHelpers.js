@@ -1,25 +1,27 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from 'react';
+import React, { useContext } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
+import UserContext from '../context/user-context';
 
-const PrivateRoute = ({ route, ...rest }) => {
-  // TODO: Implement check towards localstorage token.
-  const isLoggedin = true;
+export const PrivateRoute = ({ route, ...rest }) => {
+  const { isAuthenticated } = useContext(UserContext);
+
   return (
+    // TODO: Implement check towards localstorage token.
     <Route
       {...rest}
       render={props =>
-        isLoggedin ? (
+        isAuthenticated ? (
           <route.component {...props} routes={route.routes} />
         ) : (
-          <Redirect to={{ pathname: `/${route.redirectTo}` }} />
+          <Redirect to={{ pathname: `${route.redirectTo}` }} />
         )}
     />
   );
 };
 
-const PublicRoute = ({ route, ...rest }) => (
+export const PublicRoute = ({ route, ...rest }) => (
   <Route {...rest} render={props => <route.component {...props} routes={route.routes} />} />
 );
 
@@ -27,7 +29,7 @@ const PublicRoute = ({ route, ...rest }) => (
  * Render a route with potential sub routes
  * https://reacttraining.com/react-router/web/example/route-config
  */
-function RouteWithSubRoutes(route) {
+export function RouteWithSubRoutes(route) {
   const { path, exact, private: privateRoute } = route;
   const RouteComponent = privateRoute ? PrivateRoute : PublicRoute;
 
@@ -42,8 +44,6 @@ export const RenderRoutes = ({ routes, ...rest }) => (
     {routes.map((route, i) => (
       <RouteWithSubRoutes key={route.key} {...route} {...rest} />
     ))}
-    {/* TODO: Add 404 Page for non matching routes */}
-    <Route component={() => <h1>Not Found!</h1>} />
   </Switch>
 );
 

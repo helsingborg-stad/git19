@@ -10,13 +10,14 @@
 import React, { Component } from 'react';
 // import env from 'react-native-config';
 // import { Alert } from 'react-native';
+import styled from 'styled-components';
 import EventHandler, { EVENT_USER_MESSAGE } from '../../../helpers/EventHandler';
 import { sendChatMsg } from '../../../services/ChatFormService';
 import { ChatBubble, ChatDivider } from '../../atoms';
 import ButtonStack from '../../molecules/ButtonStack';
 import StorageService, { COMPLETED_FORMS_KEY, USER_KEY } from '../../../services/StorageService';
 import MarkdownConstructor from '../../../helpers/MarkdownConstructor';
-import styled from 'styled-components';
+import { TasksConsumer } from '../../../context/tasks-context';
 
 let context;
 let sessionId;
@@ -112,15 +113,20 @@ export default class WatsonAgent extends Component {
       status: 'completed',
       data: answers,
     };
-    try {
-      await StorageService.putData(COMPLETED_FORMS_KEY, formData).then(() => {
-        StorageService.getData(COMPLETED_FORMS_KEY).then(value => {
-          this.updateActiveFormsBadge(value.length);
-        });
-      });
-    } catch (error) {
-      console.log('Save form error', error);
-    }
+
+    // CONTEXT-TEST: Adding a task/completedform to the context state.
+    this.context.addTask(formData);
+
+    // try {
+    //   await StorageService.putData(COMPLETED_FORMS_KEY, formData).then(() => {
+    //     StorageService.getData(COMPLETED_FORMS_KEY).then(value => {
+    //       this.updateActiveFormsBadge(value.length);
+    //     });
+    //   });
+    // } catch (error) {
+    //   console.log('Save form error', error);
+    // }
+
     await chat.addMessages([
       {
         Component: props => <ButtonStackWithMargin {...props} chat={chat} />,
@@ -296,3 +302,5 @@ export default class WatsonAgent extends Component {
     return null;
   }
 }
+
+WatsonAgent.contextType = TasksConsumer;

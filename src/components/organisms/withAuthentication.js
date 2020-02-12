@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import Auth from '../../helpers/AuthHelper';
+import { logIn, logOut } from '../../helpers/AuthHelper';
 import StorageService, { USER_KEY } from '../../services/StorageService';
 import {
   authorize,
@@ -10,7 +10,7 @@ import {
 
 const FAKE_PERSONAL_NUMBER = '201111111111';
 const FAKE_TOKEN =
-  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImp0aSI6IjFlZDcyYzJjLWQ5OGUtNGZjMC04ZGY2LWY5NjRkOTYxMTVjYSIsImlhdCI6MTU2Mjc0NzM2NiwiZXhwIjoxNTYyNzUwOTc0fQ.iwmUMm51j-j2BYui9v9371DkY5LwLGATWn4LepVxmNk';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbm8iOiIxOTc0MDYwMjc4MjYiLCJpYXQiOjE1ODEwNjQ4OTIsImV4cCI6MTYxMjYwMDg5Mn0.JCBvQ3cbd-2b6jvdwhSoC7AxJ9DVML11OSlWZvFZG8o';
 
 /**
  * Wraps a react component with user authentication component.
@@ -70,7 +70,10 @@ const withAuthentication = WrappedComponent =>
 
         try {
           const { user, accessToken } = authResponse.data;
-          await Auth.logIn(user, accessToken);
+          const loggedIn = logIn({ user, token: accessToken });
+          if (!loggedIn) {
+            throw new Error('Login failed');
+          }
         } catch (error) {
           throw new Error('Login failed');
         }
@@ -100,7 +103,7 @@ const withAuthentication = WrappedComponent =>
         console.log(error);
       } finally {
         // Clears access token and reset state
-        Auth.logOut();
+        logOut();
         this.setState({
           isLoading: false,
         });
@@ -125,7 +128,7 @@ const withAuthentication = WrappedComponent =>
         const { user } = response.data;
 
         try {
-          await Auth.logIn(user, FAKE_TOKEN);
+          logIn({ user, token: FAKE_TOKEN });
         } catch (e) {
           // BY PASS REJECTION
           // throw "Login failed";

@@ -7,12 +7,20 @@ import { MemoryRouter } from 'react-router-dom';
 import smoothscroll from 'smoothscroll-polyfill';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { TasksProvider } from './context/tasks-context';
+import { UserProvider } from './context/user-context';
+
+smoothscroll.polyfill();
 
 smoothscroll.polyfill();
 
 ReactDOM.render(
   <MemoryRouter>
-    <App />
+    <UserProvider>
+      <TasksProvider>
+        <App />
+      </TasksProvider>
+    </UserProvider>
   </MemoryRouter>,
   document.getElementById('root')
 );
