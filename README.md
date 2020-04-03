@@ -13,4 +13,6 @@ npm run watch-server
 cd client
 npm install
 npm run start
+// OR
+npm run dev
 ```
